@@ -4,10 +4,11 @@ import Edge from 'selenium-webdriver/edge';
 import Firefox from 'selenium-webdriver/firefox';
 import { Browser } from 'selenium-webdriver/lib/capabilities';
 import { FRAMEWORK_ENV_CONFIG } from 'tests/helper/envReader';
+import { BrowserType } from '../types/driver';
 
-const REMOTE_GRID_URL = FRAMEWORK_ENV_CONFIG.GRID_URL;
-const RUN_MODE = FRAMEWORK_ENV_CONFIG.RUN_MODE;
-const BROWSER_NAME = FRAMEWORK_ENV_CONFIG.BROWSER;
+const BROWSER_NAME: BrowserType = FRAMEWORK_ENV_CONFIG.BROWSER;
+const RUN_MODE: string = FRAMEWORK_ENV_CONFIG.RUN_MODE;
+const REMOTE_GRID_URL: string = FRAMEWORK_ENV_CONFIG.GRID_URL;
 
 const getChromeInstance = async () => {
     if (RUN_MODE === 'docker') {
