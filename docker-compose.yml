@@ -1,42 +1,61 @@
-# To execute this docker compose yml file use `docker compose -f docker-compose.yml up`
-# Add the `-d` flag at the end for detached execution
-version: "3"
 services:
+    selenium-hub:
+        image: selenium/hub:latest
+        container_name: selenium-hub
+        ports:
+            - '4442:4442'
+            - '4443:4443'
+            - '4444:4444'
 
-  selenium-hub:
-    image: selenium/hub:latest
-    container_name: selenium-hub
-    ports:
-      - "4442:4442"
-      - "4443:4443"
-      - "4444:4444"
+    chrome:
+        image: selenium/node-chrome:latest
+        shm_size: 2gb
+        depends_on:
+            - selenium-hub
+        environment:
+            - SE_EVENT_BUS_HOST=selenium-hub
+            - SE_EVENT_BUS_PUBLISH_PORT=4442
+            - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
 
-  chrome:
-    image: selenium/node-chrome:latest
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    edge:
+        image: selenium/node-edge:latest
+        shm_size: 2gb
+        depends_on:
+            - selenium-hub
+        environment:
+            - SE_EVENT_BUS_HOST=selenium-hub
+            - SE_EVENT_BUS_PUBLISH_PORT=4442
+            - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
 
-  edge:
-    image: selenium/node-edge:latest
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    firefox:
+        image: selenium/node-firefox:latest
+        shm_size: 2gb
+        depends_on:
+            - selenium-hub
+        environment:
+            - SE_EVENT_BUS_HOST=selenium-hub
+            - SE_EVENT_BUS_PUBLISH_PORT=4442
+            - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
 
-  firefox:
-    image: selenium/node-firefox:latest
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    allure:
+        image: frankescobar/allure-docker-service
+        environment:
+            - CHECK_RESULTS_EVERY_SECONDS=1
+            - KEEP_HISTORY=1
+        ports:
+            - '5050:5050'
+        volumes:
+            - ./allure-results:/app/allure-results
+            - ./allure-reports:/app/default-reports
+
+    allure-ui:
+        image: frankescobar/allure-docker-service-ui
+        environment:
+            - ALLURE_DOCKER_PUBLIC_API_URL=http://localhost:5050
+            - ALLURE_DOCKER_PUBLIC_API_URL_PREFIX=
+        ports:
+            - '5252:5252'
+
+volumes:
+    allure-results:
+    allure-reports:

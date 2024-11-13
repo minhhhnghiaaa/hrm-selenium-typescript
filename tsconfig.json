@@ -1,6 +1,18 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+            "@/*": ["./*"],
+            "@tests/*": ["./tests/*"],
+            "@config/*": ["./tests/config/*"],
+            "@constants/*": ["./tests/constants/*"],
+            "@env/*": ["./tests/env/*"],
+            "@helper/*": ["./tests/helper/*"],
+            "@pages/*": ["./tests/pages/*"],
+            "@specs/*": ["./tests/specs/*"],
+            "@testdata/*": ["./tests/testdata/*"],
+            "@types/*": ["./tests/types/*"]
+        },
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
