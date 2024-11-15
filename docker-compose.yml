@@ -2,6 +2,7 @@ services:
     selenium-hub:
         image: selenium/hub:latest
         container_name: selenium-hub
+        restart: always
         ports:
             - '4442:4442'
             - '4443:4443'
@@ -16,16 +17,9 @@ services:
             - SE_EVENT_BUS_HOST=selenium-hub
             - SE_EVENT_BUS_PUBLISH_PORT=4442
             - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-
-    edge:
-        image: selenium/node-edge:latest
-        shm_size: 2gb
-        depends_on:
-            - selenium-hub
-        environment:
-            - SE_EVENT_BUS_HOST=selenium-hub
-            - SE_EVENT_BUS_PUBLISH_PORT=4442
-            - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+            - SE_SESSION_REQUEST_TIMEOUT=5
+            - SE_NODE_MAX_SESSIONS=4
+            - VNC_NO_PASSWORD=1
 
     firefox:
         image: selenium/node-firefox:latest
@@ -40,8 +34,8 @@ services:
     allure:
         image: frankescobar/allure-docker-service
         environment:
-            - CHECK_RESULTS_EVERY_SECONDS=1
-            - KEEP_HISTORY=1
+            CHECK_RESULTS_EVERY_SECONDS: 1
+            KEEP_HISTORY: 1
         ports:
             - '5050:5050'
         volumes:
@@ -51,8 +45,8 @@ services:
     allure-ui:
         image: frankescobar/allure-docker-service-ui
         environment:
-            - ALLURE_DOCKER_PUBLIC_API_URL=http://localhost:5050
-            - ALLURE_DOCKER_PUBLIC_API_URL_PREFIX=
+            ALLURE_DOCKER_PUBLIC_API_URL: 'http://localhost:5050'
+            ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ''
         ports:
             - '5252:5252'
 

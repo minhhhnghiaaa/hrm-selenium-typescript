@@ -1,7 +1,6 @@
-import { By, until, WebElement } from 'selenium-webdriver';
+import { By } from 'selenium-webdriver';
 import { BasePage } from './base.page';
 import { isNil, invariant } from 'es-toolkit';
-import { captureAndAttachScreenshot } from '../utils/screenshot.util';
 import * as allure from 'allure-js-commons';
 
 interface LoginCredentials {
@@ -32,9 +31,7 @@ export class LoginPage extends BasePage {
             'Tài khoản và mật khẩu không được để trống',
         );
         await allure.step('Điền tài khoản và mật khẩu', async () => {
-            await this.waitForElementVisible(this.locators.usernameInput);
             await this.clearAndSendKeys(this.locators.usernameInput, username);
-            await this.waitForElementVisible(this.locators.passwordInput);
             await this.clearAndSendKeys(this.locators.passwordInput, password);
         });
 
@@ -53,14 +50,14 @@ export class LoginPage extends BasePage {
 
     public async getUserName(): Promise<string> {
         return await allure.step('Lấy tên người dùng', async () => {
-            await this.waitForElementVisible(this.locators.userName);
+            await this.waitForElement(this.locators.userName);
             return this.getText(this.locators.userName);
         });
     }
 
     public async isLoggedIn(): Promise<boolean> {
         return await allure.step('Kiểm tra đăng nhập', async () => {
-            await this.waitForElementVisible(this.locators.userName);
+            await this.waitForElement(this.locators.userName);
             return true;
         });
     }
