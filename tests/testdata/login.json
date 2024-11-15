@@ -4,7 +4,9 @@
         "password": "Abc@1234!1",
         "url_login": "https://hrm.giaiphapmobifone.vn/auth/login",
         "url_login_success": "https://hrm.giaiphapmobifone.vn/tai-khoan/nguoi-dung",
-        "url_forgot_password": "https://hrm.giaiphapmobifone.vn/auth/forgot-password"
+        "url_forgot_password": "https://hrm.giaiphapmobifone.vn/auth/forgot-password",
+        "url_api_login": "https://api-hrm.giaiphapmobifone.vn/auth/login",
+        "url_api_user": "https://api-hrm.giaiphapmobifone.vn/users"
     },
     "invalid": {
         "username": "nghia.minh",

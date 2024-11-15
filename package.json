@@ -38,6 +38,7 @@
         "@types/selenium-webdriver": "^4.1.27",
         "allure-commandline": "^2.32.0",
         "allure-mocha": "^3.0.6",
+        "axios": "^1.7.7",
         "chai": "^4.5.0",
         "dotenv": "^16.4.5",
         "eslint": "^9.14.0",
