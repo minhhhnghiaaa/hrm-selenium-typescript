@@ -1,47 +1,74 @@
-import { expect } from 'chai';
-import { WebDriver } from 'selenium-webdriver';
-import { APP_CONSTANTS } from 'tests/constants/appConstants';
-import { ENV } from 'tests/env/manager';
-import { initializeDriver, quiteDriver } from 'tests/config/driverFactory';
-import { DashboardPage } from 'tests/pages/dashboard.page';
-import { LoginPage } from 'tests/pages/login.page';
-import loginData from 'tests/testdata/login.json';
+import { BaseTest } from './base.spec';
+import { describe, it } from 'mocha';
+import { assert } from 'chai';
+import { isNil } from 'es-toolkit';
+import { invariant } from 'es-toolkit/compat';
+import loginData from '@testdata/login.json';
 
-describe('login feature', () => {
-    let driver: WebDriver;
+class LoginTest extends BaseTest {
+    constructor() {
+        super();
+    }
 
-    beforeEach('invoke browser', async () => {
-        driver = await initializeDriver();
+    async testSuccessfulLogin(): Promise<void> {
+        invariant(
+            !isNil(loginData.valid.username) && !isNil(loginData.valid.password),
+            'Tài khoản và mật khẩu không được để trống',
+        );
+
+        await this.loginPage.login(loginData.valid);
+        const isLoggedIn = await this.loginPage.isLoggedIn();
+        assert.isTrue(isLoggedIn, 'Đăng nhập thành công');
+    }
+
+    async testInvalidLogin(): Promise<void> {
+        await this.loginPage.login(loginData.invalid);
+        const errorText = await this.loginPage.invalidLoginError();
+        assert.include(
+            errorText.toLowerCase(),
+            'tài khoản hoặc mật khẩu không hợp lệ',
+            'Lỗi đăng nhập',
+        );
+    }
+
+    async testForgotPasswordLink(): Promise<void> {
+        await this.loginPage.clickForgotPassword();
+
+        const currentUrl = await this.driver.getCurrentUrl();
+        const expectedUrl = loginData.valid.url_forgot_password;
+        assert.include(currentUrl, expectedUrl, 'Đường dẫn quên mật khẩu');
+    }
+}
+
+describe('Login Test Suite', function () {
+    let loginTest: LoginTest;
+
+    before(async function () {
+        loginTest = new LoginTest();
+        await loginTest.before();
     });
 
-    afterEach('close browser', async () => {
-        await quiteDriver(driver);
+    beforeEach(async function () {
+        await loginTest.beforeEach(this);
     });
 
-    it('should login with valid credentials @smoke', async () => {
-        const loginPage = new LoginPage(driver);
-
-        await loginPage.open(ENV.APP_URL);
-        expect(await loginPage.getHeaderText()).equal(APP_CONSTANTS.LOGIN_PAGE_HEADER);
-        expect(await driver.getTitle()).equal(APP_CONSTANTS.LOGIN_PAGE_TITLE);
-
-        await loginPage.login(loginData.valid);
-
-        const dashboardPage = new DashboardPage(driver);
-        await dashboardPage.waitUntilTitleVisible();
-
-        expect(await driver.getCurrentUrl()).equal(ENV.APP_URL);
-        expect(await driver.getTitle()).equal(APP_CONSTANTS.DASHBOARD_PAGE_TITLE);
-        expect(await dashboardPage.getHeaderText()).equal(APP_CONSTANTS.DASHBOARD_PAGE_HEADER);
+    afterEach(async function () {
+        await loginTest.afterEach(this);
     });
 
-    it('should not login with invalid credentials', async () => {
-        const loginPage = new LoginPage(driver);
+    after(async function () {
+        await loginTest.after();
+    });
 
-        await loginPage.open(ENV.APP_URL);
-        expect(await loginPage.getHeaderText()).equal(APP_CONSTANTS.LOGIN_PAGE_HEADER);
+    it('should login successfully with valid credentials', async function () {
+        await loginTest.testSuccessfulLogin();
+    });
 
-        await loginPage.login(loginData.invalid);
-        expect(await loginPage.invalidLoginError()).equal(APP_CONSTANTS.INVALID_LOGIN_ERROR);
+    it('should show error with invalid credentials', async function () {
+        await loginTest.testInvalidLogin();
+    });
+
+    it('should navigate to forgot password page', async function () {
+        await loginTest.testForgotPasswordLink();
     });
 });

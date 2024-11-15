@@ -1,10 +1,14 @@
 {
     "valid": {
-        "username": "superadmin",
-        "password": "superadmin"
+        "username": "nghia.minh",
+        "password": "Abc@1234!1",
+        "url_login": "https://hrm.giaiphapmobifone.vn/auth/login",
+        "url_login_success": "https://hrm.giaiphapmobifone.vn/tai-khoan/nguoi-dung",
+        "url_forgot_password": "https://hrm.giaiphapmobifone.vn/auth/forgot-password"
     },
     "invalid": {
-        "username": "wrongUser",
-        "password": "wrongUser"
+        "username": "nghia.minh",
+        "password": "Abc@1234!11",
+        "url_login_failed": "https://hrm.giaiphapmobifone.vn/auth/login"
     }
 }

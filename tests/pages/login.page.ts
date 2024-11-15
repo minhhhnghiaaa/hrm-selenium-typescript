@@ -1,46 +1,74 @@
-import { By, until } from 'selenium-webdriver';
-import { BasePage } from 'tests/pages/base.page';
+import { By, until, WebElement } from 'selenium-webdriver';
+import { BasePage } from './base.page';
+import { isNil, invariant } from 'es-toolkit';
+import { captureAndAttachScreenshot } from '../utils/screenshot.util';
+import * as allure from 'allure-js-commons';
+
+interface LoginCredentials {
+    readonly username: string;
+    readonly password: string;
+}
 
 export class LoginPage extends BasePage {
-    private get header() {
-        return By.className('login-title');
-    }
-    private get usernameInput() {
-        return By.id('login_username');
-    }
-    private get passwordInput() {
-        return By.id('login_password');
-    }
-    private get loginButton() {
-        return By.xpath('//button[contains(@class, "login-button")]');
-    }
-    private get loginError() {
-        return By.xpath('//*[@class="login-error visible"]');
-    }
-    private get alertText() {
-        return By.className('alert-text');
-    }
+    private readonly locators = Object.freeze({
+        // Form elements
+        usernameInput: By.id('tai_khoan'),
+        passwordInput: By.id('mat_khau'),
+        loginButton: By.css('button[type="submit"]'),
+        // Messages & Alerts
+        //relative css selector
+        errorMessage: By.className('title title-only'),
+        // Navigation
+        forgotPasswordLink: By.linkText('Quên mật khẩu?'),
+        // User info
+        userName: By.css('div[class="ant-col"] div:nth-child(2) span:nth-child(1)'),
+        // Loading & Dashboard
+        spinner: By.className('dashed-loading'),
+    });
 
-    async open(appUrl: string) {
-        await this.driver.get(appUrl);
-        await this.waitForElement(this.header);
-    }
-
-    async getHeaderText() {
-        return await this.getText(this.header);
-    }
-
-    async login(data: { username: string; password: string }) {
-        await this.sendKeys(this.usernameInput, data.username);
-        await this.sendKeys(this.passwordInput, data.password);
-        await this.click(this.loginButton);
-    }
-
-    async invalidLoginError() {
-        await this.waitForElement(this.loginError);
-        await this.driver.wait(
-            until.elementTextContains(await this.get(this.alertText), 'invalid'),
+    public async login({ username, password }: LoginCredentials): Promise<void> {
+        invariant(
+            !isNil(username) && !isNil(password),
+            'Tài khoản và mật khẩu không được để trống',
         );
-        return await this.getText(this.alertText);
+        await allure.step('Điền tài khoản và mật khẩu', async () => {
+            await this.waitForElementVisible(this.locators.usernameInput);
+            await this.clearAndSendKeys(this.locators.usernameInput, username);
+            await this.waitForElementVisible(this.locators.passwordInput);
+            await this.clearAndSendKeys(this.locators.passwordInput, password);
+        });
+
+        await allure.step('Thực hiện đăng nhập', async () => {
+            await this.waitForElementToBeClickable(this.locators.loginButton);
+            await this.click(this.locators.loginButton);
+            // await this.waitForLoadingComplete(this.locators.spinner);
+        });
+    }
+
+    public async invalidLoginError(): Promise<string> {
+        return await allure.step('Lấy thông báo lỗi', async () => {
+            return this.getText(this.locators.errorMessage);
+        });
+    }
+
+    public async getUserName(): Promise<string> {
+        return await allure.step('Lấy tên người dùng', async () => {
+            await this.waitForElementVisible(this.locators.userName);
+            return this.getText(this.locators.userName);
+        });
+    }
+
+    public async isLoggedIn(): Promise<boolean> {
+        return await allure.step('Kiểm tra đăng nhập', async () => {
+            await this.waitForElementVisible(this.locators.userName);
+            return true;
+        });
+    }
+
+    public async clickForgotPassword(): Promise<void> {
+        return await allure.step('Click vào liên kết quên mật khẩu', async () => {
+            await this.waitForElement(this.locators.forgotPasswordLink);
+            await this.click(this.locators.forgotPasswordLink);
+        });
     }
 }
